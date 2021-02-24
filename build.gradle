@@ -1,9 +1,9 @@
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version '1.4.30'
+  id 'org.jetbrains.kotlin.multiplatform' version '1.4.30'
 }
 repositories {
-    mavenCentral()
-    jcenter()
+  mavenCentral()
+  jcenter()
 }
 
 def hostOs = System.getProperty("os.name")
@@ -11,35 +11,37 @@ def isLinux = hostOs == "Linux"
 def isWindows = hostOs.startsWith("Windows")
 
 kotlin {
-    // For ARM, should be changed to iosArm32 or iosArm64
-    // For Linux, should be changed to e.g. linuxX64
-    // For MacOS, should be changed to e.g. macosX64
-    // For Windows, should be changed to e.g. mingwX64
-    if(isLinux){
-        linuxX64("native"){
-            binaries { executable { entryPoint = 'sample.main' } }
-        }
-    }else if(isWindows){
-        mingwX64("native"){
-            binaries { executable { entryPoint = 'sample.main' } }
-        }
-    }else {
-        macosX64("native"){
-            binaries { executable { entryPoint = 'sample.main' } }
-        }
+  // For ARM, should be changed to iosArm32 or iosArm64
+  // For Linux, should be changed to e.g. linuxX64
+  // For MacOS, should be changed to e.g. macosX64
+  // For Windows, should be changed to e.g. mingwX64
+  if (isLinux) {
+    linuxX64("native") {
+      binaries { executable { entryPoint = 'sample.main' } }
     }
+  } else if (isWindows) {
+    mingwX64("native") {
+      binaries { executable { entryPoint = 'sample.main' } }
+    }
+  } else {
+    macosX64("native") {
+      binaries { executable { entryPoint = 'sample.main' } }
+    }
+  }
 
-    sourceSets {
-        // Note: To enable common source sets please comment out 'kotlin.import.noCommonSourceSets' property
-        // in gradle.properties file and re-import your project in IDE.
-        nativeMain {
-            dependencies {
-                implementation "co.touchlab:stately-concurrency:1.1.4"
-            }
-        }
-        nativeTest {
-        }
+  sourceSets {
+    // Note: To enable common source sets please comment out 'kotlin.import.noCommonSourceSets' property
+    // in gradle.properties file and re-import your project in IDE.
+    nativeMain {
+      dependencies {
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2-native-mt"
+//        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
+        implementation "co.touchlab:stately-concurrency:1.1.4"
+      }
     }
+    nativeTest {
+    }
+  }
 }
 
 // Use the following Gradle tasks to run your application:

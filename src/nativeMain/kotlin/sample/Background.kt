@@ -1,73 +1,75 @@
 package sample
 
-import kotlin.native.concurrent.ensureNeverFrozen
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlin.native.concurrent.isFrozen
 
-fun basicBackground(){
+fun basicBackground() {
+  println("Is main thread $isMainThread")
+  background {
     println("Is main thread $isMainThread")
+  }
+}
+
+fun captureState() {
+  val sd = SomeData("Hello 🥶", 67)
+  println("Am I frozen? ${sd.isFrozen}")
+  background {
+    println("Am I frozen now? ${sd.isFrozen}")
+  }
+  println("Am I frozen? ${sd.isFrozen}")
+}
+
+fun captureTooMuch() {
+  val model = CountingModel()
+  model.increment()
+  println("I have ${model.count}")
+
+  model.increment()
+  println("I have ${model.count}") // We won't get here
+}
+
+class CountingModel {
+  var count = 0
+
+  fun increment() {
+    count++
     background {
-        println("Is main thread $isMainThread")
+      saveToDb(count)
     }
+  }
+
+  private fun saveToDb(arg: Int) {
+    //Do some db stuff
+    println("Saving $arg to db")
+  }
 }
 
-fun captureState(){
-    val sd = SomeData("Hello 🥶", 67)
-    println("Am I frozen? ${sd.isFrozen}")
-    background {
-        println("Am I frozen now? ${sd.isFrozen}")
-    }
+fun captureTooMuchAgain() {
+  val model = CountingModel()
+  println("model is frozen ${model.isFrozen}")
+  model.increment()
+  println("model is frozen ${model.isFrozen}")
 }
 
-fun captureTooMuch(){
-    val model = CountingModel()
-    model.increment()
-    println("I have ${model.count}")
+fun captureArgs() {
+  val model = CountingModelSafer()
+  model.increment()
+  println("I have ${model.count}")
 
-    model.increment()
-    println("I have ${model.count}") //We won't get here
+  model.increment()
+  println("I have ${model.count}")
 }
 
-class CountingModel{
-    var count = 0
+class CountingModelSafer {
+  var count = 0
 
-    fun increment(){
-        count++
-        background {
-            saveToDb(count)
-        }
-    }
+  fun increment() {
+    count++
+    saveToDb(count)
+  }
 
-    private fun saveToDb(arg:Int){
-        //Do some db stuff
-        println("Saving $arg to db")
-    }
-}
-
-fun captureTooMuchAgain(){
-    val model = CountingModel()
-    println("model is frozen ${model.isFrozen}")
-    model.increment()
-    println("model is frozen ${model.isFrozen}")
-}
-
-fun captureArgs(){
-    val model = CountingModelSafer()
-    model.increment()
-    println("I have ${model.count}")
-
-    model.increment()
-    println("I have ${model.count}")
-}
-
-class CountingModelSafer{
-    var count = 0
-
-    fun increment(){
-        count++
-        saveToDb(count)
-    }
-
-    private fun saveToDb(arg:Int) = background {
-        println("Doing db stuff with $arg, in main $isMainThread")
-    }
+  private fun saveToDb(arg: Int) = background {
+    println("Doing db stuff with $arg, in main $isMainThread")
+  }
 }

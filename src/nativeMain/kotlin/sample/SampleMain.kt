@@ -1,43 +1,66 @@
 package sample
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlin.native.concurrent.isFrozen
+
 fun main() {
-    setupThreading()
+  Platform.isMemoryLeakCheckerActive = false
 
-    println("\n\n---------------")
+  setupThreading()
 
-    // 1) Simple State
-    // Just your usual mutable state, in the main thread.
-//    runSimpleState()
+  println("\n\n---------------")
 
-    // 2) Frozen State
-//    freezeSomeState()
-//    failChanges()
-//    freezeChildren()
+  // 1) Simple State
+  // Just your usual mutable state, in the main thread.
+  runSimpleState()
 
-    // 3) Global State
-//    cantChangeThis()
-//    canChangeThreadLocal()
-//    threadLocalDifferentThreads()
-//    companionAlsoFrozen()
-//    globalCounting()
-//    globalCountingFail()
-//    globalCountingSharedFail()
+  // 2) Frozen State
+  freezeSomeState()
+  failChanges()
+  freezeChildren()
 
-    // 4) Background
-//    basicBackground()
-//    captureState()
-//    captureTooMuch()
+  // 3) Global State
+//  cantChangeThis()
+  canChangeThreadLocal()
+  threadLocalDifferentThreads()
+//  companionAlsoFrozen()
+  globalCounting()
+//  globalCountingFail()
+//  globalCountingSharedFail()
+
+  // 4) Background
+  basicBackground()
+  captureState()
+
+  runBlocking {
+    val sd = SomeData("Hello 🥶", 67)
+    println("${sd.isFrozen}")
+
+    withContext(Dispatchers.Default) {
+      val sd2 = SomeData("Hello 🥶", 67)
+      println("sd2 ${sd2.isFrozen}")
+      delay(100)
+      println("sd2 2 ${sd2.isFrozen}")
+    }
+  }
+
+  a()
+
+//  captureTooMuch()
 //    captureTooMuchAgain()
 //    captureArgs()
 
-    // 5) Debugging
+  // 5) Debugging
 //    ensureNeverFrozenFailNow()
 //    ensureNeverFrozenFailLater()
 //    ensureNeverFrozenBackground()
 //    captureTooMuchInit()
 
-    //Leave this please...
-    teardownThreading()
+  //Leave this please...
+  teardownThreading()
 
-    println("---------------\n\n")
+  println("---------------\n\n")
 }
